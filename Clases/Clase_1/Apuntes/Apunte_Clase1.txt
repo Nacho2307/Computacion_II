@@ -1,0 +1,133 @@
+# Apuntes sobre Git y Entrada/Salida en Unix/Linux
+
+## 1. Introducción a Git y Control de Versiones
+
+### • ¿Qué es Git?
+Git es un sistema de control de versiones distribuido que permite gestionar y rastrear cambios en archivos y proyectos de software. A diferencia de los sistemas centralizados, cada desarrollador tiene una copia completa del historial del proyecto.
+
+### • Ventajas de Git sobre sistemas centralizados:
+- *Autonomía:* Permite trabajar sin conexión a internet.
+- *Rendimiento:* Todas las operaciones son locales, lo que mejora la velocidad.
+- *Resiliencia:* No depende de un servidor central.
+- *Flexibilidad:* Permite flujos de trabajo no lineales y colaboración entre equipos.
+- *Seguridad:* Usa hashes criptográficos para proteger la integridad del historial.
+
+### • Instalación y configuración de Git:
+Verificar si Git está instalado:
+
+bash
+git --version
+
+Configurar identidad de usuario:
+
+bash
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu.correo@example.com"
+
+
+## 2. Creación y Estructura de un Repositorio Git
+
+### • Inicializar un repositorio Git:
+
+bash
+mkdir MiProyecto
+cd MiProyecto
+git init
+
+Esto crea un directorio oculto .git que almacena el historial y configuraciones del repositorio.
+
+### • Verificar el estado del repositorio:
+
+bash
+git status
+
+
+### • Estructura recomendada de un repositorio:
+
+MiProyecto/
+│-- README.md
+│-- TP_1/
+│-- TP_2/
+│-- Clases/
+│   ├── Clase_1/
+│   │   ├── Apuntes/
+│   │   ├── Ejercicios/
+│   │   ├── Resumen_pedagógico/
+│-- TRABAJO_FINAL/
+
+
+## 3. Flujo de Trabajo en Git
+
+### • Área de trabajo, Staging Area y Repositorio
+1. *Área de trabajo:* Donde editas archivos.
+2. *Staging Area:* Zona donde preparas los cambios antes de confirmarlos.
+3. *Repositorio:* Donde se almacenan los commits.
+
+### • Comandos clave:
+
+bash
+git add archivo.txt  # Agregar un archivo al staging
+
+git commit -m "Mensaje claro del cambio"  # Guardar los cambios en el repositorio
+
+git log --oneline  # Ver historial de commits
+
+
+## 4. Conexión con Repositorios Remotos
+
+### • Agregar un repositorio remoto:
+
+bash
+git remote add origin URL_DEL_REPOSITORIO
+
+
+### • Subir cambios al repositorio remoto:
+
+bash
+git push -u origin main
+
+(-u vincula la rama local con la remota para futuros git push sin especificar la rama).
+
+### • Obtener cambios remotos:
+
+bash
+git pull origin main
+
+
+## 5. Entrada/Salida en Unix/Linux
+
+### • Tipos de entrada y salida:
+- *Entrada estándar (stdin):* Fuente de datos que un programa recibe.
+- *Salida estándar (stdout):* Donde un programa muestra su salida normal.
+- *Salida de error estándar (stderr):* Para mensajes de error.
+
+### • Redirecciones:
+
+bash
+comando > archivo.txt   # Redirige la salida al archivo (sobrescribe)
+comando >> archivo.txt  # Redirige la salida al archivo (agrega)
+comando 2> error.log    # Redirige errores a un archivo
+comando > salida.txt 2>&1  # Redirige stdout y stderr al mismo archivo
+
+
+### • Pipes (|):
+
+bash
+ls -l | grep ".txt" | wc -l  # Cuenta archivos .txt en el directorio
+
+
+## 6. Resumen de Comandos Esenciales
+
+| Comando | Descripción |
+|---------|-------------|
+| git init | Inicializa un repositorio Git. |
+| git status | Muestra el estado de los archivos. |
+| git add archivo.txt | Agrega un archivo al staging. |
+| git commit -m "mensaje" | Crea un commit con los cambios. |
+| git log --oneline | Muestra el historial de commits en una línea. |
+| git push origin main | Envía cambios al repositorio remoto. |
+| ls -l | Lista archivos con detalles. |
+| cat archivo.txt | Muestra el contenido de un archivo. |
+| echo "texto" > archivo.txt | Crea un archivo con texto. |
+| grep "patrón" archivo.txt | Busca un patrón en un archivo. |
+| wc -l archivo.txt | Cuenta líneas en un archivo. |
