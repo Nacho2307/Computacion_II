@@ -1,0 +1,111 @@
+
+## *Resumen Teórico: Manejo de Argumentos de Línea de Comandos en Python*
+
+### *1. Introducción a los Argumentos de Línea de Comandos*
+
+Cuando ejecutamos scripts en Python desde la terminal, podemos pasarles *argumentos de línea de comandos*. Estos son valores que se pasan al programa en el momento de su ejecución y permiten personalizar su comportamiento sin necesidad de modificar el código. Por ejemplo, podemos pasar un archivo de entrada, especificar una opción como un modo detallado o definir un archivo de salida.
+
+### *2. sys.argv: Lectura Básica de Argumentos*
+
+- sys.argv es una lista en Python que contiene los argumentos de línea de comandos.
+  - sys.argv[0] es el nombre del script.
+  - sys.argv[1], sys.argv[2], etc., son los argumentos proporcionados por el usuario.
+  
+Aunque sys.argv es útil para leer argumentos, no es la mejor opción para manejar opciones complejas o cuando necesitamos una validación adecuada. Además, no gestiona de forma automática mensajes de ayuda o errores, lo cual puede ser complicado cuando el script crece en complejidad.
+
+### *3. getopt: Para Argumentos Simples*
+
+- *getopt* es un módulo estándar que se utiliza para analizar argumentos de línea de comandos, basado en el formato Unix de opciones de una sola letra (-o) o de nombre largo (--option).
+- Puedes usar getopt para gestionar argumentos simples.
+- Sintaxis básica:
+  python
+  import getopt
+  opts, args = getopt.getopt(sys.argv[1:], "o:", ["opcion="])
+  
+  - o: indica que la opción -o requiere un valor.
+  - opts es una lista de tuplas con las opciones y sus valores.
+  - args es una lista de los argumentos restantes.
+  
+*Limitaciones*:
+- getopt no proporciona validaciones complejas, ni manejo automático de errores de usuario, por lo que es adecuado solo para scripts simples.
+
+### *4. argparse: Para Argumentos Más Complejos*
+
+- *argparse* es un módulo más avanzado que permite crear interfaces de línea de comandos más robustas y fáciles de usar. Proporciona más flexibilidad y características, como:
+  - Mensajes automáticos de ayuda.
+  - Validación de tipos.
+  - Argumentos obligatorios o con valores predeterminados.
+  - Manejo de errores.
+  
+*Características principales de argparse*:
+- *ArgumentParser*: Es la clase principal para definir el análisis de argumentos.
+  python
+  parser = argparse.ArgumentParser(description="Un script para procesar archivos.")
+  
+- *add_argument*: Define los argumentos que tu script aceptará.
+  - *Argumentos Posicionales*: Aquellos que el usuario debe proporcionar en un orden específico.
+    python
+    parser.add_argument("entrada", help="Archivo de entrada obligatorio.")
+    
+  - *Argumentos Opcionales*: Aquellos que el usuario puede proporcionar opcionalmente.
+    python
+    parser.add_argument("-o", "--salida", default="resultado.txt", help="Archivo de salida opcional.")
+    
+  - *Tipo de Datos*: Puedes especificar el tipo de dato para la entrada (e.g., int, float).
+    python
+    parser.add_argument("-n", "--numero", type=int, help="Número entero.")
+    
+  - *Validación personalizada*: Puedes usar funciones personalizadas para validar los valores de los argumentos.
+    python
+    def es_positivo(valor):
+        valor = int(valor)
+        if valor <= 0:
+            raise argparse.ArgumentTypeError("El número debe ser positivo.")
+        return valor
+    parser.add_argument("-x", "--positivo", type=es_positivo)
+    
+
+*Opciones Avanzadas*:
+- *nargs*: Controla el número de valores que un argumento puede aceptar.
+  - nargs="+": Acepta uno o más valores.
+  - nargs="*": Acepta cero o más valores.
+- *choices*: Restringe los valores posibles de un argumento a un conjunto predefinido.
+  python
+  parser.add_argument("operacion", choices=["suma", "resta", "multiplicacion"])
+  
+- *Argumentos mutuamente excluyentes*: Usar add_mutually_exclusive_group() para que el usuario pueda elegir solo una opción de un conjunto de opciones mutuamente excluyentes.
+  python
+  group = parser.add_mutually_exclusive_group()
+  group.add_argument("-a", "--opcion_a", action="store_true")
+  group.add_argument("-b", "--opcion_b", action="store_true")
+  
+
+### *5. Ejemplos y Casos de Uso*
+
+- *Ejemplo básico de argparse*:
+  python
+  parser = argparse.ArgumentParser(description="Un script para procesar archivos.")
+  parser.add_argument("entrada", help="Archivo de entrada obligatorio.")
+  parser.add_argument("-o", "--salida", default="resultado.txt", help="Archivo de salida opcional.")
+  args = parser.parse_args()
+  print(f"Archivo de entrada: {args.entrada}")
+  print(f"Archivo de salida: {args.salida}")
+  
+
+- *Ejemplo de validación con argparse*:
+  python
+  def es_positivo(valor):
+      valor = int(valor)
+      if valor <= 0:
+          raise argparse.ArgumentTypeError("El número debe ser positivo.")
+      return valor
+
+  parser = argparse.ArgumentParser(description="Un script con validación.")
+  parser.add_argument("-n", "--numero", type=es_positivo, required=True)
+  args = parser.parse_args()
+  
+
+### *6. ¿Cuándo usar getopt y cuándo usar argparse?*
+
+- *getopt* es adecuado para scripts simples que solo necesitan gestionar opciones básicas (como flags y valores).
+- *argparse* es más adecuado para scripts más complejos, donde se necesita una validación más robusta, argumentos obligatorios, tipos de datos específicos, y una mayor flexibilidad.
