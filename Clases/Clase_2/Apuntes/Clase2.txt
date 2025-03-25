@@ -1,0 +1,86 @@
+1. ¿Qué es un Proceso?
+Un proceso es un programa en ejecución. Tiene su propio espacio de memoria, recursos asignados (como CPU, archivos, etc.) y estado (ejecutándose, esperando, etc.). Cada proceso tiene un identificador único, conocido como PID (Process ID).
+
+Diferencia entre programa y proceso:
+
+Programa: Un conjunto de instrucciones almacenadas en disco.
+Proceso: Un programa que se está ejecutando y tiene recursos asignados (memoria, CPU, etc.).
+2. El Modelo de Procesos en UNIX/Linux
+Jerarquía de procesos:
+Los procesos se organizan en una jerarquía. Un proceso padre puede crear varios procesos hijos.
+init (o systemd en sistemas más nuevos) es el primer proceso que se ejecuta al iniciar el sistema y se convierte en el padre de todos los demás procesos.
+Ejemplo (ver la jerarquía de procesos):
+
+pstree -p
+3. Creación de Procesos en Python
+En UNIX/Linux, los procesos pueden ser creados usando las llamadas al sistema fork() y exec().
+
+fork():
+Crea un proceso hijo que es una copia exacta del proceso padre.
+Retorna 0 en el proceso hijo y el PID del hijo en el proceso padre.
+Ejemplo de fork():
+
+import os
+
+pid = os.fork()
+if pid == 0:
+    print("Soy el proceso hijo")
+else:
+    print(f"Soy el proceso padre, mi hijo tiene PID {pid}")
+exec():
+Se usa para reemplazar el código del proceso actual por otro programa. El proceso padre puede usar fork() para crear un hijo y luego exec() para que el hijo ejecute otro programa.
+Ejemplo de exec() en el hijo:
+
+import os
+
+pid = os.fork()
+if pid == 0:
+    os.execlp("ls", "ls", "-l")  # El hijo ejecuta el comando ls
+else:
+    os.wait()  # El padre espera que el hijo termine
+4. Esperar a los Hijos con wait()
+El padre puede usar wait() para esperar que los procesos hijos terminen, evitando que queden en estado zombi (un proceso hijo que termina, pero sigue estando en la tabla de procesos porque el padre no lo ha esperado).
+
+Ejemplo de uso de wait():
+
+import os
+
+pid = os.fork()
+if pid == 0:
+    print("Soy el hijo y termino mi ejecución")
+else:
+    os.wait()  # El padre espera a que el hijo termine
+    print("El hijo ha terminado")
+5. Procesos Zombi y Huérfanos
+Proceso zombi: Ocurre cuando un proceso hijo termina, pero el proceso padre no lo espera. El hijo sigue existiendo en la tabla de procesos hasta que el padre lo recoge.
+Proceso huérfano: Ocurre cuando el proceso padre termina antes que el hijo. El hijo es adoptado por init (PID 1), que se encarga de esperar su finalización.
+Ejemplo de proceso zombi:
+
+import os
+
+pid = os.fork()
+if pid == 0:
+    print("Soy el hijo y me termino")
+else:
+    # El padre no hace nada, por lo que el hijo queda en estado zombi
+    pass
+6. Aplicación Práctica: Crear un Servidor Multiproceso
+Un servidor multiproceso puede manejar múltiples clientes, cada uno con un proceso hijo.
+
+Ejemplo: Servidor que maneja 3 clientes (usando fork()):
+
+import os
+
+def manejar_cliente(cliente_id):
+    print(f"Manejando cliente {cliente_id}")
+
+def servidor():
+    for i in range(3):  # Se manejan 3 clientes
+        pid = os.fork()
+        if pid == 0:
+            manejar_cliente(i + 1)
+            exit(0)  # El hijo termina
+    for _ in range(3):  # El padre espera 3 hijos
+        os.wait()
+
+servidor()
