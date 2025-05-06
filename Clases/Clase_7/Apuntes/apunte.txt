@@ -1,0 +1,120 @@
+Apuntes sobre Señales en Sistemas Operativos y su Manejo en Python
+1. Conceptos Básicos sobre Señales
+¿Qué son las señales?
+
+Son un mecanismo de comunicación entre procesos en sistemas operativos.
+
+Permiten a un proceso enviar notificaciones o eventos a otro proceso para indicarle que algo ha sucedido (ej. interrupción de un proceso, solicitud de terminación).
+
+Tipos de señales:
+
+Señales síncronas: Se envían y reciben en el mismo momento (ej. división por cero).
+
+Señales asíncronas: Pueden llegar en cualquier momento (ej. SIGKILL, SIGTERM).
+
+Señales en UNIX y POSIX:
+
+Permiten interrumpir, suspender, reanudar, o terminar procesos.
+
+Algunas señales comunes incluyen:
+
+SIGINT: Interrupción (Ctrl+C).
+
+SIGTERM: Solicita la terminación de un proceso.
+
+SIGKILL: Fuerza la terminación de un proceso.
+
+SIGSTOP: Pausa un proceso.
+
+SIGCONT: Reanuda un proceso detenido.
+
+2. Manejo de Señales en Python
+Uso de signal.signal() para manejar señales:
+
+La función signal.signal(signum, handler) permite registrar un manejador de señales para una señal específica.
+
+El manejador debe recibir dos parámetros:
+
+signum: El número de la señal.
+
+frame: El objeto que representa la pila de ejecución actual.
+
+Ejemplo:
+
+python
+Copiar
+Editar
+import signal
+
+def manejador(signum, frame):
+    print(f"Señal {signum} recibida")
+
+signal.signal(signal.SIGINT, manejador)  # Asocia SIGINT con el manejador
+Acción predeterminada si no hay manejador:
+
+Si no hay un manejador registrado, el proceso ejecutará la acción predeterminada para esa señal (por ejemplo, terminar el proceso para SIGTERM).
+
+signal.SIG_IGN:
+
+Se utiliza para ignorar una señal. El proceso no realizará ninguna acción al recibirla.
+
+Ejemplo:
+
+python
+Copiar
+Editar
+signal.signal(signal.SIGINT, signal.SIG_IGN)  # Ignora SIGINT
+signal.pause():
+
+Hace que el proceso se bloquee hasta recibir una señal, lo que es útil para que el proceso espere sin consumir CPU.
+
+3. Problemas y Limitaciones de Señales
+Uso de print() en manejadores de señales:
+
+El uso de print() dentro de un manejador de señales puede ser problemático, ya que no es seguro de usar dentro de un manejador de señales debido a que no es async-signal-safe (puede causar comportamientos inesperados).
+
+Señales y Multihilos:
+
+Solo el hilo principal puede manejar señales en Python. Esto se debe a que el intérprete de Python (CPython) tiene un Global Interpreter Lock (GIL) que impide que otros hilos manejen señales de manera eficiente.
+
+Para manejar señales en hilos secundarios, es necesario que el hilo principal se encargue de recibir y redistribuir las señales.
+
+Solución:
+
+Usar un threading.Event() para sincronizar la recepción de señales y notificar a los hilos secundarios.
+
+Funciones async-signal-safe:
+
+Son funciones que se pueden ejecutar dentro de un manejador de señales sin causar efectos indeseados. Ejemplos incluyen exit() y fork().
+
+Limitaciones para enviar datos con señales:
+
+Las señales tradicionales no pueden transportar datos complejos, solo un número de identificación. Las señales reales (SIGRTMIN a SIGRTMAX) y sigqueue() permiten transmitir valores pequeños como enteros.
+
+4. Señales Reales y sigqueue()
+Señales Reales (SIGRTMIN y SIGRTMAX):
+
+Se utilizan cuando se necesita prioridad en el manejo de señales.
+
+A diferencia de las señales tradicionales, las señales reales se encolan, lo que evita la pérdida de señales.
+
+sigqueue() en lugar de kill():
+
+Permite enviar señales junto con un valor adicional (por ejemplo, un entero), lo que facilita la discriminación entre diferentes tipos de eventos.
+
+Ejemplo:
+
+python
+Copiar
+Editar
+import signal
+import os
+
+def manejador(signum, frame):
+    print(f"Señal {signum} con valor recibido")
+
+signal.signal(signal.SIGRTMIN, manejador)
+os.kill(os.getpid(), signal.SIGRTMIN)  # Enviar una señal SIGRTMIN al proceso
+Comparación con colas de mensajes:
+
+Las colas de mensajes son más flexibles y permiten enviar estructuras complejas como strings o structs, mientras que sigqueue() solo permite enviar un entero.
